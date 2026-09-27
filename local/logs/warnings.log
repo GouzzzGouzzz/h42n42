@@ -1,0 +1,9 @@
+Sep 27 20:46:04: ocsigen:main: [WARNING] Cannot create the command pipe local/var/run/mysite-cmd. I will continue without.
+                                         Unix.Unix_error(Unix.ENOENT, "mkfifo", "local/var/run/mysite-cmd")
+Sep 27 20:46:04: ocsigen:config: [WARNING] While parsing config file, tag <host>: No defaulthostname, assuming it is "GouzPC.localdomain"
+Sep 27 20:47:32: ocsigen:main: [WARNING] Cannot create the command pipe local/var/run/mysite-cmd. I will continue without.
+                                         Unix.Unix_error(Unix.ENOENT, "mkfifo", "local/var/run/mysite-cmd")
+Sep 27 20:47:32: ocsigen:config: [WARNING] While parsing config file, tag <host>: No defaulthostname, assuming it is "GouzPC.localdomain"
+Sep 27 20:49:08: ocsigen:main: [WARNING] Cannot create the command pipe local/var/run/mysite-cmd. I will continue without.
+                                         Unix.Unix_error(Unix.ENOENT, "mkfifo", "local/var/run/mysite-cmd")
+Sep 27 20:49:08: ocsigen:config: [WARNING] While parsing config file, tag <host>: No defaulthostname, assuming it is "GouzPC.localdomain"

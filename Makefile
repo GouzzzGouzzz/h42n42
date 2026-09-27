@@ -13,26 +13,28 @@ PACKAGES = -y \
 	ocsigen-ppx-rpc \
 	ocsipersist-sqlite \
 	ocsipersist \
+	ocsipersist-sqlite-config \
 	
 
 # Build
 
 all:
-	cd $(DUNE_DIR) && $(MAKE)
+	dune build
 
 clean:
-	cd $(DUNE_DIR) && $(MAKE) clean
+	dune clean
 
-fclean:
-	cd $(DUNE_DIR) && $(MAKE) fclean
+fclean: clean
 
-re:
-	cd $(DUNE_DIR) && $(MAKE) re
+re: fclean all
 
 ## Run
 
 run:
-	cd $(DUNE_DIR) && $(MAKE) test.byte
+	dune exec -- ocsigenserver -c h42n42.conf.in
+
+rerun: re run
+
 
 # Init
 

@@ -1,0 +1,15 @@
+<ocsigen>
+  <server>
+    <port>8080</port>
+
+    <logdir>local/logs/</logdir>
+    <datadir>local/data/</datadir>
+    <charset>utf-8</charset>
+
+    <commandpipe>local/var/run/mysite-cmd</commandpipe>
+    <extension findlib-package="ocsigenserver.ext.staticmod"/>
+    <host hostfilter="*">
+      <static dir="static/" />
+    </host>
+  </server>
+</ocsigen>
