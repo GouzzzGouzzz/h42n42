@@ -1,3 +1,4 @@
-local/data/*
+local/data/
 local/logs/
-_buid/
+_build/
+*.log
