@@ -9,7 +9,7 @@ module H42N42_app =
 
 let main_service =
   Eliom_service.create
-    ~path:(Eliom_service.Path [])
+    ~path:(Eliom_service.Path ["home"])
     ~meth:(Eliom_service.Get Eliom_parameter.unit)
     ()
 
@@ -20,4 +20,10 @@ let () =
       Lwt.return
         (html
            (head (title (txt "H42N42")) [])
-           (body [])))
+           (body [
+              div [
+                (txt "Hello")
+              ]
+
+           ]))
+           )

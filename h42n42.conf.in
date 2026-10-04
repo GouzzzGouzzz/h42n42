@@ -6,10 +6,16 @@
     <datadir>local/data/</datadir>
     <charset>utf-8</charset>
 
-    <commandpipe>local/var/run/mysite-cmd</commandpipe>
     <extension findlib-package="ocsigenserver.ext.staticmod"/>
+    <extension findlib-package="ocsipersist-sqlite-config">
+      <database file="local/data/ocsidb"/>
+    </extension>
+    <extension findlib-package="eliom.server"/>
     <host hostfilter="*">
       <static dir="static/" />
+      <site path="">
+        <eliom module="_build/default/src/h42n42.cma" />
+      </site>
     </host>
   </server>
 </ocsigen>
