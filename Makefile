@@ -14,15 +14,17 @@ PACKAGES = -y \
 	ocsipersist-sqlite \
 	ocsipersist \
 	ocsipersist-sqlite-config \
-	
+
 
 # Build
 
 all:
 	dune build
+	-cp _build/default/src/client/main.bc.js static/h42n42.js
 
 clean:
 	dune clean
+	-rm -f static/h42n42.js
 
 fclean: clean
 
@@ -30,7 +32,7 @@ re: fclean all
 
 ## Run
 
-run:
+run: all
 	dune exec -- ocsigenserver -c h42n42.conf.in
 
 rerun: re run
@@ -39,7 +41,7 @@ rerun: re run
 # Init
 
 install:
-	opam init --no-setup 
+	opam init --no-setup
 	opam switch create $(NAME) 5.4.1 || true
 	opam install -y $(PACKAGES) || true
 	@echo "Run: eval \$$(opam env)"

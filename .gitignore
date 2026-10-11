@@ -1,5 +1,5 @@
 local/*
 _build/
 *.log
-
+static/*.js
 

@@ -1,0 +1,19 @@
+(rule
+ (target main.ml)
+ (action (copy ../main.ml main.ml)))
+
+(rule
+ (target zone.ml)
+ (action (copy ../zone.ml zone.ml)))
+
+(rule
+ (target creet.ml)
+ (action (copy ../creet.ml creet.ml)))
+
+(executable
+ (name main)
+ (modes js)
+ (modules creet zone main)
+ (libraries eliom.client)
+ (preprocess
+  (pps eliom.ppx.client lwt_ppx js_of_ocaml-ppx)))
