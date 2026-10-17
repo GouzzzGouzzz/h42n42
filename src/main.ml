@@ -25,6 +25,10 @@ let () =
         (Lwt.async (fun () -> Creet.spawn_interval ~%main_area ())
          : unit)
       ] in
+      let _ = [%client (
+        Creet.add_creet ~%main_area ();
+        Creet.add_creet ~%main_area () : unit)]
+      in
       Lwt.return
         (html
            (head (title (txt "H42N42")) [
