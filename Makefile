@@ -32,7 +32,7 @@ re: fclean all
 
 ## Run
 
-run: all
+run: re all
 	dune exec -- ocsigenserver -c h42n42.conf.in
 
 rerun: re run

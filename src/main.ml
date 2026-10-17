@@ -1,9 +1,4 @@
 open Eliom_content.Html.D
-(* open%client Js_of_ocaml
-open%client Js_of_ocaml_lwt
-open%client Eliom_content.Html.To_dom *)
-
-
 
 module H42N42_app =
   Eliom_registration.App
@@ -22,19 +17,21 @@ let () =
   H42N42_app.register
     ~service:main_service
     (fun () () ->
+      let main_area = div ~a:[a_class ["main-area"]; a_id "main-area"] [
+        Zone.hospital_html;
+        Zone.river_html;
+      ] in
+      let _ = [%client
+        (Lwt.async (fun () -> Creet.spawn_interval ~%main_area ())
+         : unit)
+      ] in
       Lwt.return
         (html
            (head (title (txt "H42N42")) [
               css_link ~uri:(make_uri ~service:(Eliom_service.static_dir ()) ["area.css"]) ()
             ])
            (body [
-              div ~a:[a_class ["main-area"]] [
-                Creet.creet_html;
-                Zone.hospital_html;
-                Zone.river_html;
-              ];
+              main_area
            ]))
            )
-
-
 

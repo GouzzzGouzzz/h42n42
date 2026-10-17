@@ -1,4 +1,4 @@
-open Eliom_content.Html.D
+open%shared Eliom_content.Html.D
 
-let hospital_html = div ~a:[a_class ["hospital"]] []
-let river_html = div ~a:[a_class ["river"]] []
+let%shared hospital_html = div ~a:[a_class ["hospital"]] []
+let%shared river_html = div ~a:[a_class ["river"]] []
