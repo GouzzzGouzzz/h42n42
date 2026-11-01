@@ -1,14 +1,14 @@
 (rule
- (target main.ml)
- (action (copy ../main.ml main.ml)))
+ (target main.eliom)
+ (action (copy ../main.eliom main.eliom)))
 
 (rule
- (target zone.ml)
- (action (copy ../zone.ml zone.ml)))
+ (target zone.eliom)
+ (action (copy ../zone.eliom zone.eliom)))
 
 (rule
- (target creet.ml)
- (action (copy ../creet.ml creet.ml)))
+ (target creet.eliom)
+ (action (copy ../creet.eliom creet.eliom)))
 
 (executable
  (name main)

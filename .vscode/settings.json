@@ -2,5 +2,13 @@
 	"ocaml.sandbox": {
 		"kind": "opam",
 		"switch": "h42n42"
-	}
+	},
+	"editor.tabSize": 2,
+	"editor.insertSpaces": true,
+	"editor.detectIndentation": false,
+	"editor.renderWhitespace": "all",
+	"files.trimTrailingWhitespace": true,
+	"files.insertFinalNewline": true,
+	"editor.fontLigatures": true,
+	"files.autoSave": "afterDelay",
 }

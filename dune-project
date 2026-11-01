@@ -1,5 +1,13 @@
 (lang dune 3.10)
 
+(dialect
+ (name "eliom-server")
+ (implementation
+  (extension "eliom"))
+ (interface
+  (extension "eliomi")))
+
+
 (name h42n42)
 (generate_opam_files true)
 
