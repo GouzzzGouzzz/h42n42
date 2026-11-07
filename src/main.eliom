@@ -18,7 +18,7 @@ let () =
   ~service:main_service
   (fun () () ->
     let _ = [%client
-      (Lwt.async (fun () -> Creet.spawn_interval ()) : unit)] in
+      (Lwt.async (fun () -> Creet.spawn_interval 0 ()) : unit)] in
     let _ = [%client (
       Creet.add_creet ();
       Creet.add_creet () : unit)]

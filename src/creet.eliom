@@ -74,9 +74,9 @@ let%client rec creet_movement creet main_area =
 
   (* Random move *)
   creet.random_dir_timer <- creet.random_dir_timer +. refresh_rate;
-  if creet.random_dir_timer > 10. then (
+  if creet.random_dir_timer > 7.5 then (
     creet.random_dir_timer <- 0.;
-    if Random.float 1. < 0.20 then (
+    if Random.float 1. < 0.50 then (
       let (dir_x, dir_y) = get_random_dir () in
       creet.dir_x <- dir_x;
       creet.dir_y <- dir_y;
@@ -92,10 +92,13 @@ let%client add_creet () =
   appendChild (Eliom_content.Html.Of_dom.of_element main_area) creet.html;
 
   (* Create a thread for one creet *)
-  Lwt.async (fun () -> creet_movement creet main_area)
+  Lwt.async (fun () -> creet_movement creet main_area )
 
-let%client rec spawn_interval () =
-  add_creet ();
-  let%lwt () = Lwt_js.sleep 0.10 in
-  spawn_interval ()
+let%client rec spawn_interval amount () =
+  if amount < 50 then (
+    add_creet ();
+    let%lwt () = Lwt_js.sleep 0.10 in
+    spawn_interval (amount + 1) ()
+  ) else
+    Lwt.return ()
 
