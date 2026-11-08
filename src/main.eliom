@@ -23,6 +23,9 @@ let () =
       ] in
     let _ = [%client (
       Creet.add_creet ();
+      Creet.add_creet ();
+      Creet.add_creet ();
+      Creet.add_creet ();
       Creet.add_creet () : unit)]
     in
       Lwt.return
