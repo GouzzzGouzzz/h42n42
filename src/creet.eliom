@@ -3,18 +3,26 @@ open%client Eliom_content.Html.Manip
 open%client Js_of_ocaml_lwt
 open%client Js_of_ocaml
 
+type%client creetStatus =
+  | Healthy
+  | Sick
+  | Mean
+  | Berserk
+
+
 type%client creetType = {
   mutable x : float;
   mutable y : float;
   mutable dir_x : float;
   mutable dir_y : float;
   mutable speed : float;
-  mutable is_sick : bool;
+  mutable status : creetStatus;
   mutable is_dragged : bool;
   mutable size : int;
   mutable random_dir_timer : float;
   mutable html : [ `Div ] Eliom_content.Html.elt;
 }
+
 
 (* Some constant settings *)
 let%client random_dir_interval = 7.5
@@ -43,7 +51,7 @@ let%client create_creet main_area () =
     dir_x = dir_x;
     dir_y = dir_y;
     speed = 3.;
-    is_sick = false;
+    status = Healthy;
     is_dragged = false;
     size = 20;
     random_dir_timer = Random.float 10.;
@@ -53,17 +61,15 @@ let%client create_creet main_area () =
 let%client be_sick creet () =
   let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
   creet_dom##.classList##add (Js.string "creet-sick");
-  creet.is_sick <- true;
+  creet.status <- Sick;
   creet.speed <- creet.speed *. 0.85
 
 let%client be_healthy creet () =
   let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
   creet_dom##.classList##remove (Js.string "creet-sick");
-  creet.is_sick <- false;
+  creet.status <- Healthy;
   creet.speed <- 3.;
   Js_of_ocaml.Console.console##log (Js.string "dropped hospital")
-
-
 
 let%client is_in_river creet () =
   let river = Dom_html.getElementById "river" in
@@ -72,8 +78,10 @@ let%client is_in_river creet () =
 
 let%client is_in_hospital creet () =
   let hospital = Dom_html.getElementById "hospital" in
-  let (_, area_y) = Zone.get_area_size hospital () in
-  if creet.y > float area_y then true else false
+  let main_area = Dom_html.getElementById "main-area" in
+  let (_, hospital_y) = Zone.get_area_size hospital () in
+  let (_, area_y) = Zone.get_area_size main_area () in
+  if creet.y +. float creet.size > float (area_y - hospital_y) then true else false
 
 let%client rec creet_movement creet main_area =
   if not creet.is_dragged then begin
@@ -94,7 +102,7 @@ let%client rec creet_movement creet main_area =
     creet_dom##.style##.top := Js_of_ocaml.Js.string (string_of_float creet.y ^ "px");
 
     (* If in river then be sick *)
-    if is_in_river creet () && not creet.is_sick  then be_sick creet ();
+    if is_in_river creet () && creet.status = Healthy then be_sick creet ();
 
     (* Random move *)
     creet.random_dir_timer <- creet.random_dir_timer +. refresh_rate;
@@ -188,7 +196,7 @@ let%client init () =
           selected_creet := None;
 
           (* If dropped in hospital *)
-          if creet.is_sick then (
+          if creet.status = Sick then (
             if is_in_hospital creet () then be_healthy creet ();
           )
         | None -> ()
