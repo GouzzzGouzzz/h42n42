@@ -35,6 +35,9 @@ let%client () = Random.self_init ()
 let%client selected_creet = ref None
 let%client creet_drag_offset = ref (0., 0.)
 
+let%client creets : creet list ref = ref []
+
+
 let%client get_random_dir () =
   let angle = Random.float (2. *. Float.pi) in
   (cos angle, sin angle)
@@ -104,6 +107,11 @@ let%client rec creet_movement creet main_area =
     (* If in river then be sick *)
     if is_in_river creet () && creet.status = Healthy then be_sick creet ();
 
+
+(* Contamination *)
+
+
+
     (* Random move *)
     creet.random_dir_timer <- creet.random_dir_timer +. refresh_rate;
     if creet.random_dir_timer > random_dir_interval then (
@@ -121,7 +129,7 @@ let%client rec creet_movement creet main_area =
 let%client add_creet () =
   let main_area = Dom_html.getElementById "main-area" in
   let creet = create_creet main_area () in
-
+    creets := creet :: !creets
   appendChild (Eliom_content.Html.Of_dom.of_element main_area) creet.html;
 
   (* Handling drag and drop *)
