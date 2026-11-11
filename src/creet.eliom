@@ -90,11 +90,13 @@ let%client be_healthy creet () =
 
 let%client be_berserk creet () =
   let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
+  creet_dom##.classList##remove (Js.string "creet-sick");
   creet_dom##.classList##add (Js.string "creet-berserk");
   creet.status <- Berserk
 
 let%client be_mean creet () =
   let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
+  creet_dom##.classList##remove (Js.string "creet-sick");
   creet_dom##.classList##add (Js.string "creet-mean");
   creet.status <- Mean;
   creet.size <- creet.size *. 0.85
@@ -204,8 +206,8 @@ let%client add_creet () =
     (Eliom_content.Html.To_dom.of_element creet.html)
     (fun ev _ ->
       Dom.preventDefault ev;
-      (match !selected_creet with
-      | None ->
+      (match !selected_creet, creet.status with
+      | None, (Healthy | Sick) ->
         (* Keep offset to avoid the creet teleporting to the mouse *)
         let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
         let rect = creet_dom##getBoundingClientRect in
@@ -215,8 +217,7 @@ let%client add_creet () =
         creet.is_dragged <- true;
         selected_creet := Some creet;
         creet_drag_offset := (offset_x, offset_y)
-
-      | Some _ -> ()
+      | _ -> ()
       );
       Lwt.return ())
     );
