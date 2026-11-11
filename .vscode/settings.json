@@ -11,4 +11,8 @@
 	"files.insertFinalNewline": true,
 	"editor.fontLigatures": true,
 	"files.autoSave": "afterDelay",
+  "files.associations": {
+    "*.eliom": "ocaml",
+    "*.eliomi": "ocaml.interface"
+  }
 }

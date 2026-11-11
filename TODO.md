@@ -6,22 +6,14 @@
 •Reproduction: As long as at least one healthy Creet exists, new Creets spawn
 periodically (e.g., every few seconds). Healthy Creets never die of old age.
 
-•No Collisions: Only contamination occurs on contact
 
 # VI.2.2 Player Interaction : Almost
 
 •Dropping Creets: Creets can be dropped anywhere, including outside the normal
 game boundaries. They will resume normal movement from their new position
 
-# VI.2.3 Contamination System
+# VI.2.3 Contamination System Done
 
-•Spread Mechanism: When a contaminated Creet touches a healthy Creet, there
-is a 2% chance of transmission per contact/iteration. Check this probability con-
-tinuously while they are in contact.
-
-•Contact Detection: Use distance calculation between Creet centers and their
-radii to determine if they are touching. Be precise: no contamination without
-actual contact.
 
 # VI.2.4 Hospital Healing : Done
 

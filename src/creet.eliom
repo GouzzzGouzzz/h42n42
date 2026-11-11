@@ -25,17 +25,19 @@ type%client creetType = {
 
 
 (* Some constant settings *)
+let%client () = Random.self_init ()
 let%client random_dir_interval = 7.5
 let%client random_dir_chance = 0.5
+let%client random_contaminate_chance = 0.02
+
 let%client refresh_rate = 1. /. 60.
-let%client () = Random.self_init ()
 
 (* Global value *)
 
 let%client selected_creet = ref None
 let%client creet_drag_offset = ref (0., 0.)
 
-let%client creets : creet list ref = ref []
+let%client creets : creetType list ref = ref []
 
 
 let%client get_random_dir () =
@@ -107,11 +109,22 @@ let%client rec creet_movement creet main_area =
     (* If in river then be sick *)
     if is_in_river creet () && creet.status = Healthy then be_sick creet ();
 
-
-(* Contamination *)
-
-
-
+    (* Contamination *)
+    if creet.status <> Healthy then (
+      List.iter (fun other_creet ->
+          if other_creet != creet && other_creet.status = Healthy then (
+            (* https://www.jeffreythompson.org/collision-detection/circle-circle.php *)
+            let dx = other_creet.x -. creet.x in
+            let dy = other_creet.y -. creet.y in
+            let dist = sqrt (dx *. dx +. dy *. dy) in
+            if dist <= (float creet.size) then (
+              if Random.float 1. < random_contaminate_chance then (
+                be_sick other_creet ();
+              )
+            )
+          )
+        ) !creets;
+      );
     (* Random move *)
     creet.random_dir_timer <- creet.random_dir_timer +. refresh_rate;
     if creet.random_dir_timer > random_dir_interval then (
@@ -129,7 +142,7 @@ let%client rec creet_movement creet main_area =
 let%client add_creet () =
   let main_area = Dom_html.getElementById "main-area" in
   let creet = create_creet main_area () in
-    creets := creet :: !creets
+  creets := creet :: !creets;
   appendChild (Eliom_content.Html.Of_dom.of_element main_area) creet.html;
 
   (* Handling drag and drop *)
