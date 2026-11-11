@@ -108,8 +108,10 @@ let%client rec creet_movement creet main_area =
     let (area_x, area_y) = Zone.get_area_size main_area () in
 
     (* angle of incidence equals angle of reflection, reversing the corresponding vector basically*)
-    if creet.x < 0. || creet.x > float (area_x - creet.size) then creet.dir_x <- -. creet.dir_x;
-    if creet.y < 0. || creet.y > float (area_y - creet.size) then creet.dir_y <- -. creet.dir_y;
+    if creet.x < 0. then creet.dir_x <- Float.abs creet.dir_x;
+    if creet.x > float (area_x - creet.size) then creet.dir_x <- -. Float.abs creet.dir_x;
+    if creet.y < 0. then creet.dir_y <- Float.abs creet.dir_y;
+    if creet.y > float (area_y - creet.size) then creet.dir_y <- -. Float.abs creet.dir_y;
 
     (* Apply to css *)
     let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
