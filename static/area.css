@@ -49,6 +49,19 @@ body {
   -webkit-user-drag: none;
 }
 
+.creet-sick {
+  background-color: rgb(6, 248, 236);
+}
+
+.creet-mean {
+  background-color: rgb(255, 0, 0);
+}
+
+.creet-berserk {
+  background-color: rgb(6, 10, 248);
+}
+
+
 .creet-in-drag {
   height: 40px !important;
   width: 40px !important;
@@ -58,6 +71,3 @@ body {
   cursor: grabbing;
 }
 
-.creet-sick {
-  background-color: rgb(6, 248, 236);
-}

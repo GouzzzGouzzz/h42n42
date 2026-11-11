@@ -18,17 +18,27 @@ type%client creetType = {
   mutable speed : float;
   mutable status : creetStatus;
   mutable is_dragged : bool;
-  mutable size : int;
+  mutable size : float;
   mutable random_dir_timer : float;
+  mutable evolve_timer : float;
+  mutable status_timer : float;
   mutable html : [ `Div ] Eliom_content.Html.elt;
 }
 
 
 (* Some constant settings *)
 let%client () = Random.self_init ()
+(* Direction *)
 let%client random_dir_interval = 7.5
 let%client random_dir_chance = 0.5
+
+(* Contamination settings *)
 let%client random_contaminate_chance = 0.02
+let%client evolve_interval = 10.0
+let%client mean_thresh = 0.1
+let%client berserk_thresh = 0.2
+
+
 
 let%client refresh_rate = 1. /. 60.
 
@@ -58,8 +68,10 @@ let%client create_creet main_area () =
     speed = 3.;
     status = Healthy;
     is_dragged = false;
-    size = 30;
+    size = 30.;
     random_dir_timer = Random.float 10.;
+    evolve_timer = 0.;
+    status_timer = 0.;
     html = creet_html;
     })
 
@@ -67,23 +79,33 @@ let%client be_sick creet () =
   let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
   creet_dom##.classList##add (Js.string "creet-sick");
   creet.status <- Sick;
-  creet.speed <- creet.speed *. 0.85
+  creet.speed <- creet.speed *. 0.85;
+  creet.evolve_timer <- 0.
 
 let%client be_healthy creet () =
   let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
   creet_dom##.classList##remove (Js.string "creet-sick");
   creet.status <- Healthy;
-  creet.speed <- 3.;
-  Js_of_ocaml.Console.console##log (Js.string "dropped hospital")
+  creet.speed <- 3.
 
+let%client be_berserk creet () =
+  let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
+  creet_dom##.classList##add (Js.string "creet-berserk");
+  creet.status <- Berserk
+
+let%client be_mean creet () =
+  let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
+  creet_dom##.classList##add (Js.string "creet-mean");
+  creet.status <- Mean;
+  creet.size <- creet.size *. 0.85
 
 let%client is_in_river creet () =
   let river = Dom_html.getElementById "river" in
   let (area_x, area_y) = Zone.get_area_size river () in
   if
     creet.y < float area_y
-    && creet.y +. float creet.size > 0.
-    && creet.x +. float creet.size > 0.
+    && creet.y +. creet.size > 0.
+    && creet.x +. creet.size > 0.
     && creet.x < float area_x
   then true else false
 
@@ -93,9 +115,9 @@ let%client is_in_hospital creet () =
   let (_, hospital_y) = Zone.get_area_size hospital () in
   let (area_x, area_y) = Zone.get_area_size main_area () in
   if
-    creet.y +. float creet.size > float (area_y - hospital_y)
+    creet.y +. creet.size > float (area_y - hospital_y)
     && creet.y < float area_y
-    && creet.x +. float creet.size > 0.
+    && creet.x +. creet.size > 0.
     && creet.x < float area_x
   then true else false
 
@@ -110,14 +132,27 @@ let%client rec creet_movement creet main_area =
 
     (* angle of incidence equals angle of reflection, reversing the corresponding vector basically*)
     if creet.x < 0. then creet.dir_x <- Float.abs creet.dir_x;
-    if creet.x > float (area_x - creet.size) then creet.dir_x <- -. Float.abs creet.dir_x;
+    if creet.x > float area_x -. creet.size then creet.dir_x <- -. Float.abs creet.dir_x;
     if creet.y < 0. then creet.dir_y <- Float.abs creet.dir_y;
-    if creet.y > float (area_y - creet.size) then creet.dir_y <- -. Float.abs creet.dir_y;
+    if creet.y > float area_y -. creet.size then creet.dir_y <- -. Float.abs creet.dir_y;
 
     (* Apply to css *)
     let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
     creet_dom##.style##.left := Js_of_ocaml.Js.string (string_of_float creet.x ^ "px");
     creet_dom##.style##.top := Js_of_ocaml.Js.string (string_of_float creet.y ^ "px");
+    creet_dom##.style##.width := Js.string (string_of_float creet.size ^ "px");
+    creet_dom##.style##.height := Js.string (string_of_float creet.size ^ "px");
+
+    (* Random move *)
+    creet.random_dir_timer <- creet.random_dir_timer +. refresh_rate;
+    if creet.random_dir_timer > random_dir_interval then (
+      creet.random_dir_timer <- 0.;
+      if Random.float 1. < random_dir_chance then (
+        let (dir_x, dir_y) = get_random_dir () in
+        creet.dir_x <- dir_x;
+        creet.dir_y <- dir_y;
+      )
+    );
 
     (* If in river then be sick *)
     if is_in_river creet () && creet.status = Healthy then be_sick creet ();
@@ -130,7 +165,7 @@ let%client rec creet_movement creet main_area =
             let dx = other_creet.x -. creet.x in
             let dy = other_creet.y -. creet.y in
             let dist = sqrt (dx *. dx +. dy *. dy) in
-            if dist <= (float creet.size) then (
+            if dist <= creet.size then (
               if Random.float 1. < random_contaminate_chance then (
                 be_sick other_creet ();
               )
@@ -139,16 +174,20 @@ let%client rec creet_movement creet main_area =
         ) !creets;
       );
 
-    (* Random move *)
-    creet.random_dir_timer <- creet.random_dir_timer +. refresh_rate;
-    if creet.random_dir_timer > random_dir_interval then (
-      creet.random_dir_timer <- 0.;
-      if Random.float 1. < random_dir_chance then (
-        let (dir_x, dir_y) = get_random_dir () in
-        creet.dir_x <- dir_x;
-        creet.dir_y <- dir_y;
-      )
-    );
+    (* Be mean or berserk *)
+    if creet.status = Sick then (
+      creet.evolve_timer <- creet.evolve_timer +. refresh_rate;
+      if creet.evolve_timer > evolve_interval then (
+        creet.evolve_timer <- 0.;
+        let roll = Random.float 1. in
+        if roll < mean_thresh then (
+          be_mean creet ();
+        )
+        else if roll < berserk_thresh then (
+          be_berserk creet ();
+        );
+      );
+    )
   end;
   let%lwt () = Lwt_js.sleep refresh_rate in
   creet_movement creet main_area
