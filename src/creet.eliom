@@ -78,15 +78,25 @@ let%client be_healthy creet () =
 
 let%client is_in_river creet () =
   let river = Dom_html.getElementById "river" in
-  let (_, area_y) = Zone.get_area_size river () in
-  if creet.y < float area_y then true else false
+  let (area_x, area_y) = Zone.get_area_size river () in
+  if
+    creet.y < float area_y
+    && creet.y +. float creet.size > 0.
+    && creet.x +. float creet.size > 0.
+    && creet.x < float area_x
+  then true else false
 
 let%client is_in_hospital creet () =
   let hospital = Dom_html.getElementById "hospital" in
   let main_area = Dom_html.getElementById "main-area" in
   let (_, hospital_y) = Zone.get_area_size hospital () in
-  let (_, area_y) = Zone.get_area_size main_area () in
-  if creet.y +. float creet.size > float (area_y - hospital_y) then true else false
+  let (area_x, area_y) = Zone.get_area_size main_area () in
+  if
+    creet.y +. float creet.size > float (area_y - hospital_y)
+    && creet.y < float area_y
+    && creet.x +. float creet.size > 0.
+    && creet.x < float area_x
+  then true else false
 
 let%client rec creet_movement creet main_area =
   if not creet.is_dragged then begin
