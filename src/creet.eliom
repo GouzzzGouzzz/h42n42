@@ -58,7 +58,7 @@ let%client create_creet main_area () =
     speed = 3.;
     status = Healthy;
     is_dragged = false;
-    size = 20;
+    size = 30;
     random_dir_timer = Random.float 10.;
     html = creet_html;
     })
@@ -75,6 +75,7 @@ let%client be_healthy creet () =
   creet.status <- Healthy;
   creet.speed <- 3.;
   Js_of_ocaml.Console.console##log (Js.string "dropped hospital")
+
 
 let%client is_in_river creet () =
   let river = Dom_html.getElementById "river" in
@@ -124,7 +125,7 @@ let%client rec creet_movement creet main_area =
     (* Contamination *)
     if creet.status <> Healthy then (
       List.iter (fun other_creet ->
-          if other_creet != creet && other_creet.status = Healthy then (
+          if other_creet != creet && other_creet.status = Healthy && not other_creet.is_dragged then (
             (* https://www.jeffreythompson.org/collision-detection/circle-circle.php *)
             let dx = other_creet.x -. creet.x in
             let dy = other_creet.y -. creet.y in
@@ -137,6 +138,7 @@ let%client rec creet_movement creet main_area =
           )
         ) !creets;
       );
+
     (* Random move *)
     creet.random_dir_timer <- creet.random_dir_timer +. refresh_rate;
     if creet.random_dir_timer > random_dir_interval then (
@@ -183,15 +185,12 @@ let%client add_creet () =
   (* Create a thread for one creet *)
   Lwt.async (fun () -> creet_movement creet main_area )
 
-let%client rec spawn_interval amount () =
-  if amount < 50 then (
-    add_creet ();
-    let%lwt () = Lwt_js.sleep 0.10 in
-    spawn_interval (amount + 1) ()
-  ) else
-    Lwt.return ()
+let%client rec spawn_interval () =
+  let%lwt () = Lwt_js.sleep 5.00 in
+  if List.exists (fun creet -> creet.status = Healthy) !creets then add_creet ();
+  spawn_interval ()
 
-let%client init () =
+let%client init_listeners () =
   (* Init eventListener of document to handle drag and drop *)
   (* Move the creet *)
   (* MOUSE MOVES *)
