@@ -1,9 +1,6 @@
 ## Project
 
-# I.2.1 Creet Movement and Behavior : almost
-
-•Reproduction: As long as at least one healthy Creet exists, new Creets spawn
-periodically (e.g., every few seconds). Healthy Creets never die of old age.
+# I.2.1 Creet Movement and Behavior : Done
 
 # VI.2.2 Player Interaction : Done
 

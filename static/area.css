@@ -36,38 +36,36 @@ body {
 
 .creet {
   position: absolute;
-  background-color: rgb(53, 32, 13);
   border-radius: 100%;
   height: 30px;
   width: 30px;
 
   touch-action: none;
-  cursor: grab;
+  z-index: 2;
 
   user-select: none;
   -webkit-user-select: none;
   -webkit-user-drag: none;
 }
 
+.creet-healthy {
+  background-color: rgb(0, 255, 0);
+  cursor: grab;
+}
+
 .creet-sick {
-  background-color: rgb(6, 248, 236);
+  background-color: rgb(255, 255, 0);
+  cursor: grab;
 }
 
 .creet-mean {
-  background-color: rgb(255, 0, 0);
+  background-color: rgb(255, 0, 255);
+  z-index: 1;
+  cursor: not-allowed;
 }
 
 .creet-berserk {
-  background-color: rgb(6, 10, 248);
+  background-color: rgb(0, 0, 255);
+  z-index: 1;
+  cursor: not-allowed;
 }
-
-
-.creet-in-drag {
-  height: 40px !important;
-  width: 40px !important;
-}
-
-.creet:active {
-  cursor: grabbing;
-}
-
