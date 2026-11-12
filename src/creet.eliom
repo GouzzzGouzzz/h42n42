@@ -22,7 +22,6 @@ type%client creetType = {
   mutable size : float;
   mutable random_dir_timer : float;
   mutable evolve_timer : float;
-  mutable status_timer : float;
   mutable death_timer : float;
   mutable has_target : bool;
   mutable html : [ `Div ] Eliom_content.Html.elt;
@@ -57,7 +56,7 @@ let%client get_random_dir () =
   (cos angle, sin angle)
 
 let%client create_creet main_area () =
-  let creet_html = div ~a:[a_class ["creet creet-healthy"]; ] [] in
+  let creet_html = div ~a:[a_class ["creet"; "creet-healthy"]; ] [] in
   (* Might need to remember this instead of calling every frame *)
   let (area_x, area_y) = Zone.get_area_size main_area () in
   let (dir_x, dir_y) = get_random_dir () in
@@ -234,7 +233,8 @@ let%client rec creet_movement creet main_area () =
       if creet.status = Mean then (
         creet.death_timer <- creet.death_timer +. refresh_rate;
         (match find_nearest_health creet () with
-        | None -> ()
+        | None ->
+          creet.has_target <- false;
         | Some target ->
           creet.has_target <- true;
           chase_creet creet target ();

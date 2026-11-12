@@ -8,9 +8,7 @@
 
 # VI.2.4 Hospital Healing : Done
 
-# VI.2.5 Special Creet Types :
-
-TODO
+# VI.2.5 Special Creet Types : Done
 
 # VI.2.6 Difficulty Progression
 
