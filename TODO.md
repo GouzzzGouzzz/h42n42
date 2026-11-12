@@ -15,12 +15,6 @@
 •Speed Increase: All Creets gradually accelerate over time, making the game
 progressively harder.
 
-•Balancing: You are free to adjust the rate of acceleration to create a good difficulty
-curve. The game should:
-  ◦Start easy, giving players time to learn mechanics
-  ◦Gradually become more challenging
-  ◦Eventually become overwhelming, leading to inevitable defeat
-
 # VI.2.7 Game Over Condition : Done
 
 # VI.2.8 Implementation Guidelines
@@ -28,9 +22,15 @@ curve. The game should:
 •Performance: Ensure smooth animation even with multiple Creets on screen.
 Each Creet should run in its own Lwt thread.
 
+
+
+
+Investigate on dragging not synchronized with the css
+
 # To note
 
 The game ends when there are no healthy or living Creets remaining
 
 The game ends when all Creets are either dead or contaminated with no healthy
 Creets remaining
+

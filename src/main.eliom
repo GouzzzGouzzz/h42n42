@@ -19,6 +19,7 @@ let () =
   (fun () () ->
     let _ = [%client
       (Creet.init_listeners ());
+      (Lwt.async (fun () -> Creet.accelerate_speed ()));
       (Lwt.async (fun () -> Creet.spawn_interval ()) : unit)
       ] in
     let _ = [%client (

@@ -29,6 +29,8 @@ type%client creetType = {
 
 (* Some constant settings *)
 let%client () = Random.self_init ()
+let%client refresh_rate = 1. /. 60.
+
 
 (* Direction *)
 let%client random_dir_interval = 7.5
@@ -40,13 +42,17 @@ let%client evolve_interval = 10.0
 let%client mean_thresh = 0.1
 let%client berserk_thresh = 0.2
 
-let%client refresh_rate = 1. /. 60.
 
-(* Global value *)
+(* Creet specific *)
 let%client base_creet_size = 30.
 let%client selected_creet = ref None
 let%client creet_drag_offset = ref (0., 0.)
 let%client creets : creetType list ref = ref []
+
+(* Difficulty *)
+let%client base_creet_speed = ref 3.
+let%client creet_acceleration_multi = 1.075
+let%client acceleration_interval = 10.
 
 
 let%client get_random_dir () =
@@ -64,7 +70,7 @@ let%client create_creet main_area () =
     y = float (area_y/2 - 10);
     dir_x = dir_x;
     dir_y = dir_y;
-    speed = 3.;
+    speed = !base_creet_speed;
     status = Healthy;
     is_dragged = false;
     size = base_creet_size;
@@ -75,6 +81,12 @@ let%client create_creet main_area () =
     html = creet_html;
     }
   )
+
+let%client rec accelerate_speed () =
+  let%lwt () = Lwt_js.sleep acceleration_interval in
+    base_creet_speed := !base_creet_speed *. creet_acceleration_multi;
+    List.iter (fun creet -> creet.speed <- creet.speed *. creet_acceleration_multi) !creets;
+    if !creets = [] then Lwt.return () else accelerate_speed ()
 
 let%client be_dead creet () =
   creet.status <- Dead;
@@ -103,7 +115,7 @@ let%client be_healthy creet () =
   creet_dom##.classList##remove (Js.string "creet-sick");
   creet_dom##.classList##add (Js.string "creet-healthy");
   creet.status <- Healthy;
-  creet.speed <- 3.
+  creet.speed <- !base_creet_speed
 
 let%client be_berserk creet () =
   let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
