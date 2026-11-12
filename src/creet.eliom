@@ -27,10 +27,8 @@ type%client creetType = {
   mutable html : [ `Div ] Eliom_content.Html.elt;
 }
 
-
 (* Some constant settings *)
 let%client () = Random.self_init ()
-
 
 (* Direction *)
 let%client random_dir_interval = 7.5
@@ -72,11 +70,24 @@ let%client create_creet main_area () =
     size = base_creet_size;
     random_dir_timer = Random.float 10.;
     evolve_timer = 0.;
-    status_timer = 0.;
     death_timer = 0.;
     has_target = false;
     html = creet_html;
-    })
+    }
+  )
+
+let%client be_dead creet () =
+  creet.status <- Dead;
+  removeSelf creet.html;
+  creets := List.filter (fun elt -> if elt != creet then true else false) !creets
+
+let%client check_game_status () =
+  if List.exists (fun creet -> creet.status = Healthy) !creets then ()
+  else
+    let gameover_dom = Dom_html.getElementById "game-over" in
+    gameover_dom##.classList##remove (Js.string "hidden");
+    let creets_copy = !creets in
+    List.iter (fun creet -> be_dead creet ()) creets_copy
 
 let%client be_sick creet () =
   let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
@@ -84,7 +95,8 @@ let%client be_sick creet () =
   creet_dom##.classList##add (Js.string "creet-sick");
   creet.status <- Sick;
   creet.speed <- creet.speed *. 0.85;
-  creet.evolve_timer <- 0.
+  creet.evolve_timer <- 0.;
+  check_game_status ()
 
 let%client be_healthy creet () =
   let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
@@ -92,11 +104,6 @@ let%client be_healthy creet () =
   creet_dom##.classList##add (Js.string "creet-healthy");
   creet.status <- Healthy;
   creet.speed <- 3.
-
-let%client be_dead creet () =
-  creet.status <- Dead;
-  removeSelf creet.html;
-  creets := List.filter (fun c -> if c != creet then true else false) !creets
 
 let%client be_berserk creet () =
   let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
@@ -133,30 +140,31 @@ let%client is_in_hospital creet () =
     && creet.x < float area_x
   then true else false
 
+let%client distance_between creet1 creet2 () =
+  let dx = (creet1.x +. creet1.size /. 2.)  -. (creet2.x +. creet2.size /. 2.) in
+  let dy = (creet1.y +. creet1.size /. 2.)  -. (creet2.y +. creet2.size /. 2.) in
+  sqrt (dx *. dx +. dy *. dy)
+
 let%client find_nearest_health creet () =
   List.fold_left (fun closest other ->
     if other.status <> Healthy || other.is_dragged then closest
     else
-        let other_dx = other.x -. creet.x in
-        let other_dy = other.y -. creet.y in
-        let other_dist = other_dx *. other_dx +. other_dy *. other_dy in
-        match closest with
-        | None -> Some other
-        | Some value ->
-          let closest_dx = value.x -. creet.x in
-          let closest_dy = value.y -. creet.y in
-          let closest_dist = closest_dx *. closest_dx +. closest_dy *. closest_dy in
-          if other_dist < closest_dist then Some other else closest
+      match closest with
+      | None -> Some other
+      | Some value ->
+        if distance_between creet other () < distance_between creet value ()
+          then Some other
+          else closest
     ) None !creets
 
 let%client chase_creet creet target () =
-    let dx = target.x -. creet.x in
-    let dy = target.y -. creet.y in
-    let len = sqrt (dx *. dx +. dy *. dy) in
-    if len > 0. then (
-      creet.dir_x <- dx /. len;
-      creet.dir_y <- dy /. len
-    )
+  let dx = (target.x +. target.size /. 2.) -. (creet.x +. creet.size /. 2.) in
+  let dy = (target.y +. target.size /. 2.) -. (creet.y +. creet.size /. 2.) in
+  let len = sqrt (dx *. dx +. dy *. dy) in
+  if len > 0. then (
+    creet.dir_x <- dx /. len;
+    creet.dir_y <- dy /. len
+  )
 
 let%client rec creet_movement creet main_area () =
   if creet.status = Dead then Lwt.return ()
@@ -203,10 +211,8 @@ let%client rec creet_movement creet main_area () =
         List.iter (fun other_creet ->
             if other_creet != creet && other_creet.status = Healthy && not other_creet.is_dragged then (
               (* https://www.jeffreythompson.org/collision-detection/circle-circle.php *)
-              let dx = other_creet.x -. creet.x in
-              let dy = other_creet.y -. creet.y in
-              let dist = sqrt (dx *. dx +. dy *. dy) in
-              if dist <= creet.size then (
+              let dist = distance_between other_creet creet () in
+              if dist <= (other_creet.size +. creet.size) /. 2. then (
                 if Random.float 1. < random_contaminate_chance then (
                   be_sick other_creet ();
                 )
@@ -275,6 +281,7 @@ let%client add_creet () =
         let offset_x = Js.float_of_number ev##.clientX -. Js.float_of_number rect##.left in
         let offset_y = Js.float_of_number ev##.clientY -. Js.float_of_number rect##.top in
 
+        creet_dom##.classList##add (Js.string "creet-dragged");
         creet.is_dragged <- true;
         selected_creet := Some creet;
         creet_drag_offset := (offset_x, offset_y)
@@ -288,8 +295,11 @@ let%client add_creet () =
 
 let%client rec spawn_interval () =
   let%lwt () = Lwt_js.sleep 5.00 in
-  if List.exists (fun creet -> creet.status = Healthy) !creets then add_creet ();
-  spawn_interval ()
+  if List.exists (fun creet -> creet.status = Healthy) !creets then (
+    add_creet ();
+    spawn_interval ())
+  else
+    Lwt.return()
 
 let%client init_listeners () =
   (* Init eventListener of document to handle drag and drop *)
@@ -327,7 +337,8 @@ let%client init_listeners () =
         | Some creet ->
           creet.is_dragged <- false;
           selected_creet := None;
-
+          let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
+          creet_dom##.classList##remove (Js.string "creet-dragged");
           (* If dropped in hospital *)
           if creet.status = Sick then (
             if is_in_hospital creet () then be_healthy creet ();

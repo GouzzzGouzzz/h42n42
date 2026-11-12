@@ -21,28 +21,16 @@ curve. The game should:
   ◦Gradually become more challenging
   ◦Eventually become overwhelming, leading to inevitable defeat
 
-•Probability Adjustments: You may modify the specified probabilities (contami-
-nation chance, berserk/mean chance) ONLY if necessary for game balance, without
-fundamentally changing the game’s nature.
-
-# VI.2.7 Game Over Condition
-
-•The game ends when there are no healthy or living Creets remaining.
-
-•Display a clear "GAME OVER" message when this condition is met.
-
-•The message should be visible and unambiguous to the player.
+# VI.2.7 Game Over Condition : Done
 
 # VI.2.8 Implementation Guidelines
-
-•Color Scheme: Use distinct colors for:
-  ◦Healthy Creets - X
-  ◦Regular sick Creets - X
-  ◦Berserk Creets
-  ◦Mean Creets
 
 •Performance: Ensure smooth animation even with multiple Creets on screen.
 Each Creet should run in its own Lwt thread.
 
-•User Feedback: Make it clear when a Creet is being dragged, when contamination
-occurs, and when healing happens.
+# To note
+
+The game ends when there are no healthy or living Creets remaining
+
+The game ends when all Creets are either dead or contaminated with no healthy
+Creets remaining
