@@ -197,8 +197,8 @@ let%client rec creet_movement creet main_area () =
 
       (* Apply to css *)
       let creet_dom = Eliom_content.Html.To_dom.of_element creet.html in
-      creet_dom##.style##.left := Js_of_ocaml.Js.string (string_of_float creet.x ^ "px");
-      creet_dom##.style##.top := Js_of_ocaml.Js.string (string_of_float creet.y ^ "px");
+      creet_dom##.style##.left := Js.string (string_of_float creet.x ^ "px");
+      creet_dom##.style##.top := Js.string (string_of_float creet.y ^ "px");
       creet_dom##.style##.width := Js.string (string_of_float creet.size ^ "px");
       creet_dom##.style##.height := Js.string (string_of_float creet.size ^ "px");
 
@@ -329,9 +329,11 @@ let%client init_listeners () =
           let offset_x, offset_y = !creet_drag_offset in
           let mouse_x = Js.float_of_number ev##.clientX -. Js.float_of_number rect##.left -. offset_x in
           let mouse_y = Js.float_of_number ev##.clientY -. Js.float_of_number rect##.top -. offset_y in
+          let valid_x = Js.string (Printf.sprintf "%.2fpx" mouse_x) in
+          let valid_y = Js.string (Printf.sprintf "%.2fpx" mouse_y) in
 
-          creet_dom##.style##.left := Js_of_ocaml.Js.string (string_of_float mouse_x ^ "px");
-          creet_dom##.style##.top := Js_of_ocaml.Js.string (string_of_float mouse_y ^ "px");
+          creet_dom##.style##.left := valid_x;
+          creet_dom##.style##.top := valid_y;
           creet.x <- mouse_x;
           creet.y <- mouse_y;
         | None -> ()
