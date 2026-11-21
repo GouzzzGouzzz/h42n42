@@ -31,6 +31,7 @@ re: fclean all
 # Local build (No docker)
 
 local-all:
+	mkdir -p local/logs local/data
 	dune build
 	-cp -u _build/default/src/client/main.bc.js static/h42n42.js
 
@@ -39,6 +40,7 @@ local-clean:
 	-rm -f static/h42n42.js
 
 local-fclean: local-clean
+	rm -rf local/
 
 local-re: local-fclean local-all
 
