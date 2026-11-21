@@ -1,6 +1,7 @@
 # H42N42
 
 H42N42 is a browser game written in OCaml with Ocsigen/Eliom.
+
 Protect the Creets from a virus spreading from a toxic river, and keep as many alive as possible.
 
 # Installation
@@ -28,12 +29,11 @@ Open http://localhost:8080 in your browser to play !
 
 ## More commands
 
-Project commands:
 ```
 make        # Build (docker-compose up --build)
 make clean  # Down
 make fclean # Remove image and container
-make re     # Clean and rebuild
+make re     # Clean and build
 ```
 
 # Informations
