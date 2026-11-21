@@ -3,6 +3,7 @@ html, body {
   height: 100%;
   width: 100%;
   overflow: hidden;
+  background-color: #222;
 }
 
 body {
@@ -86,8 +87,8 @@ body {
   justify-content: center;
   align-items: center;
 
-  background: white;
-  color: #222;
+  background-color: #222;
+  color: white;
   text-align: center;
 }
 

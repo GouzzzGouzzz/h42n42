@@ -1,0 +1,7 @@
+services:
+  h42n42:
+    image: h42n42:latest
+    build: .
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
