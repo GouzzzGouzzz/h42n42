@@ -41,6 +41,7 @@ body {
   height: 30px;
   width: 30px;
   border: 2px solid transparent;
+  box-sizing: border-box;
 
   touch-action: none;
   z-index: 2;
