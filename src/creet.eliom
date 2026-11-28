@@ -59,10 +59,9 @@ let%client get_random_dir () =
   let angle = Random.float (2. *. Float.pi) in
   (cos angle, sin angle)
 
-let%client create_creet main_area () =
+let%client create_creet () =
   let creet_html = div ~a:[a_class ["creet"; "creet-healthy"]; ] [] in
-  (* Might need to remember this instead of calling every frame *)
-  let (area_x, area_y) = Zone.get_area_size main_area () in
+  let (area_x, area_y) = !Zone.main_area_size in
   let (dir_x, dir_y) = get_random_dir () in
   (
     {
@@ -131,8 +130,7 @@ let%client be_mean creet () =
   creet.size <- creet.size *. 0.85
 
 let%client is_in_river creet () =
-  let river = Dom_html.getElementById "river" in
-  let (area_x, area_y) = Zone.get_area_size river () in
+  let (area_x, area_y) = !Zone.river_size in
   if
     creet.y < float area_y
     && creet.y +. creet.size > 0.
@@ -141,10 +139,8 @@ let%client is_in_river creet () =
   then true else false
 
 let%client is_in_hospital creet () =
-  let hospital = Dom_html.getElementById "hospital" in
-  let main_area = Dom_html.getElementById "main-area" in
-  let (_, hospital_y) = Zone.get_area_size hospital () in
-  let (area_x, area_y) = Zone.get_area_size main_area () in
+  let (_, hospital_y) = !Zone.hospital_size in
+  let (area_x, area_y) = !Zone.main_area_size in
   if
     creet.y +. creet.size > float (area_y - hospital_y)
     && creet.y < float area_y
@@ -187,7 +183,7 @@ let%client rec creet_movement creet main_area () =
       creet.y <- creet.y +. creet.dir_y *. creet.speed;
 
       (* Stay in bound *)
-      let (area_x, area_y) = Zone.get_area_size main_area () in
+      let (area_x, area_y) = !Zone.main_area_size in
 
       (* angle of incidence equals angle of reflection, reversing the corresponding vector basically*)
       if creet.x < 0. then creet.dir_x <- Float.abs creet.dir_x;
@@ -275,7 +271,7 @@ let%client rec creet_movement creet main_area () =
 
 let%client add_creet () =
   let main_area = Dom_html.getElementById "main-area" in
-  let creet = create_creet main_area () in
+  let creet = create_creet  () in
   creets := creet :: !creets;
   appendChild (Eliom_content.Html.Of_dom.of_element main_area) creet.html;
 
@@ -361,3 +357,9 @@ let%client init_listeners () =
       );
       Lwt.return ())
     );
+
+    (* Resize to avoid way too much dom request per creet *)
+    Zone.update_sizes ();
+    Lwt.async (fun () -> Js_of_ocaml_lwt.Lwt_js_events.onresizes (fun _ _ ->
+        Zone.update_sizes ();
+        Lwt.return ()));
